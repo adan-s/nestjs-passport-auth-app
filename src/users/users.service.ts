@@ -21,13 +21,12 @@ export class UsersService {
   }
 
   async createUser(username: string, password: string, email: string): Promise<User> {
-    // Check for existing username
+
     const existingUserByUsername = await this.findOne(username);
     if (existingUserByUsername) {
       throw new ConflictException('Username already exists');
     }
 
-    // Check for existing email
     const existingUserByEmail = await this.findByEmail(email);
     if (existingUserByEmail) {
       throw new ConflictException('Email already in use');
