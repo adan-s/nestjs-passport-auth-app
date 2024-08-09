@@ -1,4 +1,4 @@
-import { Controller, Get, Request, Post, UseGuards, Body, Query } from '@nestjs/common';
+import { Controller, Get, Request, Post, UseGuards, Body, Query, ConflictException } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
@@ -31,10 +31,17 @@ export class AppController {
   
   @Post('auth/register')
   async register(@Body() userDto: any) {
-    const user = await this.usersService.createUser(userDto.username, userDto.password, userDto.email);
-    await this.authService.sendVerificationEmail(user);
-    const { password, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    try {
+      const user = await this.usersService.createUser(userDto.username, userDto.password, userDto.email);
+      await this.authService.sendVerificationEmail(user);
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        return { message: error.message };
+      }
+      throw error;
+    }
   }
 
   @Get('verify-email')

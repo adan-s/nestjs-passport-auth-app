@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import * as  nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
@@ -28,9 +28,10 @@ export class AuthService {
   }
 
   async logout(token: string) {
-   // this.blacklistService.add(token);
+    // this.blacklistService.add(token);
     return { message: 'Logged out successfully' };
   }
+
 
   async sendVerificationEmail(user: any) {
     const transporter = nodemailer.createTransport({
