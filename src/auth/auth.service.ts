@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import * as nodemailer from 'nodemailer';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from '../users/users.service';
+import * as  nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
@@ -25,6 +25,11 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
     };
+  }
+
+  async logout(token: string) {
+   // this.blacklistService.add(token);
+    return { message: 'Logged out successfully' };
   }
 
   async sendVerificationEmail(user: any) {
