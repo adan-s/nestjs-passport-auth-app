@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -27,8 +27,7 @@ export class AuthService {
     };
   }
 
-  async logout(token: string) {
-    // this.blacklistService.add(token);
+  async logout() {
     return { message: 'Logged out successfully' };
   }
 
@@ -42,8 +41,8 @@ export class AuthService {
         pass: process.env.EMAIL_PASS,
       },
       secure: true,
-      debug: true, // Show debug output
-      logger: true, // Log information
+      debug: true, 
+      logger: true, 
     });
 
     const verificationUrl = `http://localhost:3000/auth/verify-email/token=${user.emailVerificationToken}`;

@@ -1,4 +1,13 @@
-import { Controller, Get, Request, Post, UseGuards, Body, Query, ConflictException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  Post,
+  UseGuards,
+  Body,
+  Query,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { LocalAuthGuard } from './auth/local-auth.guard';
 import { AuthService } from './auth/auth.service';
@@ -20,14 +29,18 @@ export class AppController {
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   getProfile(@Request() req) {
-    console.log("user:",req.user);
-    return req.user; 
+    console.log('user:', req.user);
+    return req.user;
   }
-  
+
   @Post('auth/register')
   async register(@Body() userDto: any) {
     try {
-      const user = await this.usersService.createUser(userDto.username, userDto.password, userDto.email);
+      const user = await this.usersService.createUser(
+        userDto.username,
+        userDto.password,
+        userDto.email,
+      );
       await this.authService.sendVerificationEmail(user);
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
@@ -51,12 +64,8 @@ export class AppController {
 
   @UseGuards(JwtAuthGuard)
   @Post('auth/logout')
-  async logout(@Request() req) {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (token) {
-      await this.authService.logout(token);
-      return { message: 'Logged out successfully' };
-    }
-    return { message: 'Token missing' };
+  async logout() {
+    await this.authService.logout();
+    return { message: 'Logged out successfully' };
   }
 }
