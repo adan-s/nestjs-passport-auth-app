@@ -11,11 +11,6 @@ export class AppController {
     private usersService: UsersService,
   ) {}
 
-  @Get('/')
-  gethello(@Request() req) {
-    return "helloooooo"; 
-  }
-
   @UseGuards(LocalAuthGuard)
   @Post('auth/login')
   async login(@Request() req) {

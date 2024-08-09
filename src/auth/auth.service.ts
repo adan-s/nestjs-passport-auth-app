@@ -38,19 +38,19 @@ export class AuthService {
       port: 465,
       host: "smtp.gmail.com",
       auth: {
-        user: 'adansalman73@gmail.com',
-        pass: 'hhsg bnmx vkih nkwy',
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
       secure: true,
       debug: true, // Show debug output
       logger: true, // Log information
     });
 
-    const verificationUrl = `http://localhost:3000/auth/verify-email?token=${user.emailVerificationToken}`;
+    const verificationUrl = `http://localhost:3000/auth/verify-email/token=${user.emailVerificationToken}`;
 
     try {
       const info = await transporter.sendMail({
-        from: '"Auth Project" <adan.salman@codedistrict.com>',
+        from: process.env.EMAIL_USER,
         to: user.email,
         subject: 'Email Verification',
         html: `<p>Please verify your email by clicking the following link: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
