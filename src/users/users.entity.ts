@@ -11,12 +11,18 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @Column({ unique: true })
   email: string;
 
-  @Column({ default: false })
-  isEmailVerified: boolean;
-
   @Column({ nullable: true })
-  emailVerificationToken: string;
+  profilePic: string;
+
+  @Column({ default: 'active' })
+  status: string;
+
+  // @Column({ nullable: true })
+  // emailVerificationToken: string;
+
+  // @Column({ default: false })
+  // isEmailVerified: boolean;
 }

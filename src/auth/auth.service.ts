@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
-import * as nodemailer from 'nodemailer';
+//import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class AuthService {
@@ -32,31 +32,31 @@ export class AuthService {
   }
 
 
-  async sendVerificationEmail(user: any) {
-    const transporter = nodemailer.createTransport({
-      port: 465,
-      host: "smtp.gmail.com",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-      secure: true,
-      debug: true, 
-      logger: true, 
-    });
+  // async sendVerificationEmail(user: any) {
+  //   const transporter = nodemailer.createTransport({
+  //     port: 465,
+  //     host: "smtp.gmail.com",
+  //     auth: {
+  //       user: process.env.EMAIL_USER,
+  //       pass: process.env.EMAIL_PASS,
+  //     },
+  //     secure: true,
+  //     debug: true, 
+  //     logger: true, 
+  //   });
 
-    const verificationUrl = `http://localhost:8000/auth/verify-email/token?${user.emailVerificationToken}`;
+  //   const verificationUrl = `http://localhost:8000/auth/verify-email/token?${user.emailVerificationToken}`;
 
-    try {
-      const info = await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: user.email,
-        subject: 'Email Verification',
-        html: `<p>Please verify your email by clicking the following link: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
-      });
-      console.log('Message sent: %s', info.messageId);
-    } catch (error) {
-      console.error('Error sending email:', error);
-    }
-  }
+  //   try {
+  //     const info = await transporter.sendMail({
+  //       from: process.env.EMAIL_USER,
+  //       to: user.email,
+  //       subject: 'Email Verification',
+  //       html: `<p>Please verify your email by clicking the following link: <a href="${verificationUrl}">${verificationUrl}</a></p>`,
+  //     });
+  //     console.log('Message sent: %s', info.messageId);
+  //   } catch (error) {
+  //     console.error('Error sending email:', error);
+  //   }
+  // }
 }

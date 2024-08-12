@@ -13,14 +13,17 @@ export class UsersService {
   ) {}
 
   async findOne(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ where: { username } });
+    return this.usersRepository.findOne({
+      where: { username },
+      select: ['id', 'username', 'email', 'profilePic', 'status','password',],
+    });
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async createUser(username: string, password: string, email: string): Promise<User> {
+  async createUser(username: string, password: string, email: string, profilePic: string, status: string): Promise<User> {
 
     const existingUserByUsername = await this.findOne(username);
     if (existingUserByUsername) {
@@ -33,23 +36,25 @@ export class UsersService {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const emailVerificationToken = crypto.randomBytes(32).toString('hex');
+    //const emailVerificationToken = crypto.randomBytes(32).toString('hex');
     const newUser = this.usersRepository.create({ 
       username, 
       password: hashedPassword, 
       email, 
-      emailVerificationToken 
+      profilePic: profilePic || '',
+      status: status || 'active', 
+      //emailVerificationToken 
     });
     return this.usersRepository.save(newUser);
   }
 
-  async verifyEmail(token: string): Promise<User | undefined> {
-    const user = await this.usersRepository.findOne({ where: { emailVerificationToken: token } });
-    if (user) {
-      user.isEmailVerified = true;
-      user.emailVerificationToken = null;
-      await this.usersRepository.save(user);
-    }
-    return user;
-  }
+  // async verifyEmail(token: string): Promise<User | undefined> {
+  //   const user = await this.usersRepository.findOne({ where: { emailVerificationToken: token } });
+  //   if (user) {
+  //     user.isEmailVerified = true;
+  //     user.emailVerificationToken = null;
+  //     await this.usersRepository.save(user);
+  //   }
+  //   return user;
+  // }
 }
