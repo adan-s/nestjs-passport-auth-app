@@ -45,7 +45,7 @@ export class AuthService {
       logger: true, 
     });
 
-    const verificationUrl = `http://localhost:3000/auth/verify-email/token?${user.emailVerificationToken}`;
+    const verificationUrl = `http://localhost:8000/auth/verify-email/token?${user.emailVerificationToken}`;
 
     try {
       const info = await transporter.sendMail({
