@@ -53,13 +53,13 @@ export class AppController {
         filename: (req, file, callback) => {
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
           const ext = extname(file.originalname);
-          console.log('File upload: Filename generation', `${uniqueSuffix}${ext}`); // Debugging statement
+          console.log('File upload: Filename generation', `${uniqueSuffix}${ext}`); 
           callback(null, `${uniqueSuffix}${ext}`);
         },
       }),
       fileFilter: (req, file, callback) => {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
-          console.log('File upload: Invalid file type', file.originalname); // Debugging statement
+          console.log('File upload: Invalid file type', file.originalname); 
           return callback(new Error('Only .jpg, .jpeg, .png files are allowed'), false);
         }
         callback(null, true);
@@ -67,8 +67,8 @@ export class AppController {
     }),
   )
   async register(@UploadedFile() file: Express.Multer.File, @Body() userDto: any) {
-    console.log('Registering user with data:', userDto); // Debugging statement
-    console.log('Uploaded file:', file); // Debugging statement to log file metadata
+    console.log('Registering user with data:', userDto);
+    console.log('Uploaded file:', file); 
     
     try {
       const user = await this.usersService.createUser(
@@ -78,12 +78,12 @@ export class AppController {
         file ? file.filename : null,
         userDto.status || 'active',
       );
-      console.log('User created:', user); // Debugging statement
-      // await this.authService.sendVerificationEmail(user); // Uncomment if needed
+      console.log('User created:', user); 
+      // await this.authService.sendVerificationEmail(user); 
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
     } catch (error) {
-      console.error('Error during registration:', error); // Debugging statement
+      console.error('Error during registration:', error); 
       if (error instanceof ConflictException) {
         return { message: error.message };
       }
@@ -91,6 +91,58 @@ export class AppController {
     }
   }
   
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('profilePic', {
+      storage: diskStorage({
+        destination: './uploads/profile-pics',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          const ext = extname(file.originalname);
+          callback(null, `${uniqueSuffix}${ext}`);
+        },
+      }),
+      fileFilter: (req, file, callback) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          return callback(new Error('Only .jpg, .jpeg, .png files are allowed'), false);
+        }
+        callback(null, true);
+      },
+    }),
+  )
+  @Post('profile/update')
+  async updateProfile(
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+    @Body() userDto: any,
+  ) {
+    console.log('Updating user with data:', userDto);
+    console.log('Uploaded file:', file);
+  
+    const updateData: any = {
+      username: userDto.username,
+      status: userDto.status,
+      email: userDto.email,
+    };
+  
+    if (file) {
+      updateData.profilePic = file.filename;
+    }
+  
+    const updatedUser = await this.usersService.updateUserProfile(req.user.id, updateData);
+  
+    return updatedUser;
+  }
+  
+
+  @UseGuards(JwtAuthGuard)
+  @Post('profile/change-password')
+  async changePassword(
+    @Request() req,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.usersService.changeUserPassword(req.user.id, body.currentPassword, body.newPassword);
+  }
 
   // @Get('verify-email')
   // async verifyEmail(@Query('token') token: string) {

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './users.entity';
 import * as bcrypt from 'bcrypt';
-import * as crypto from 'crypto';
+//import * as crypto from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -15,7 +15,7 @@ export class UsersService {
   async findOne(username: string): Promise<User | undefined> {
     return this.usersRepository.findOne({
       where: { username },
-      select: ['id', 'username', 'email', 'profilePic', 'status','password',],
+      select: ['id', 'username', 'email', 'profilePic', 'status', 'password'],
     });
   }
 
@@ -23,8 +23,13 @@ export class UsersService {
     return this.usersRepository.findOne({ where: { email } });
   }
 
-  async createUser(username: string, password: string, email: string, profilePic: string, status: string): Promise<User> {
-
+  async createUser(
+    username: string,
+    password: string,
+    email: string,
+    profilePic: string,
+    status: string,
+  ): Promise<User> {
     const existingUserByUsername = await this.findOne(username);
     if (existingUserByUsername) {
       throw new ConflictException('Username already exists');
@@ -37,15 +42,50 @@ export class UsersService {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     //const emailVerificationToken = crypto.randomBytes(32).toString('hex');
-    const newUser = this.usersRepository.create({ 
-      username, 
-      password: hashedPassword, 
-      email, 
+    const newUser = this.usersRepository.create({
+      username,
+      password: hashedPassword,
+      email,
       profilePic: profilePic || '',
-      status: status || 'active', 
-      //emailVerificationToken 
+      status: status || 'active',
+      //emailVerificationToken
     });
     return this.usersRepository.save(newUser);
+  }
+
+  async updateUserProfile(userId: number, updateData: any): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+  
+    user.username = updateData.username || user.username;
+    user.status = updateData.status || user.status;
+    user.email = updateData.email || user.email;
+  
+    if (updateData.profilePic) {
+      user.profilePic = updateData.profilePic;
+    }
+  
+    console.log('Final user data to save:', user);
+  
+    return this.usersRepository.save(user);
+  }
+  
+
+  async changeUserPassword(
+    userId: number,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+
+    if (!user || !(await bcrypt.compare(currentPassword, user.password))) {
+      throw new Error('Current password is incorrect');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    return this.usersRepository.save(user);
   }
 
   // async verifyEmail(token: string): Promise<User | undefined> {
